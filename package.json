@@ -1,0 +1,12 @@
+{
+  "name": "wsdl-viewer",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "setup": "git submodule update --init --recursive",
+    "import": "node src/import.mjs",
+    "serve": "npx serve . --no-clipboard --listen ${PORT:-3000}",
+    "start": "npm run serve"
+  },
+  "dependencies": {}
+}

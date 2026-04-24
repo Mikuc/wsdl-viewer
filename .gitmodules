@@ -1,0 +1,3 @@
+[submodule "vendor/wsdl-viewer"]
+	path = vendor/wsdl-viewer
+	url = https://github.com/tomi-vanek/wsdl-viewer.git

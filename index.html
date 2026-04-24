@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WSDL Viewer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen font-mono">
+
+  <div class="max-w-3xl mx-auto px-6 py-12">
+    <h1 class="text-2xl font-bold text-white mb-1">WSDL Viewer</h1>
+    <p class="text-gray-500 text-sm mb-8">Imported SOAP services</p>
+
+    <div class="mb-6">
+      <input
+        id="search"
+        type="text"
+        placeholder="Filter services..."
+        class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-sm text-gray-100 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-600"
+        autofocus
+      />
+    </div>
+
+    <div id="list" class="space-y-2"></div>
+    <p id="empty" class="text-gray-600 text-sm hidden">No services match.</p>
+    <p id="no-data" class="text-gray-600 text-sm hidden">
+      No services imported yet. Run <code class="text-blue-400">npm run import -- &lt;path&gt;</code> first.
+    </p>
+  </div>
+
+  <script>
+    async function load() {
+      let meta = {}
+      try {
+        const res = await fetch('services.json')
+        if (!res.ok) throw new Error()
+        meta = await res.json()
+      } catch {
+        document.getElementById('no-data').classList.remove('hidden')
+        return
+      }
+
+      const services = Object.values(meta).sort((a, b) => a.outputName.localeCompare(b.outputName))
+
+      if (services.length === 0) {
+        document.getElementById('no-data').classList.remove('hidden')
+        return
+      }
+
+      const list = document.getElementById('list')
+
+      function render(filter) {
+        const q = filter.toLowerCase()
+        const visible = services.filter(s => s.outputName.toLowerCase().includes(q))
+        list.innerHTML = visible.map(s => `
+          <a href="services/${s.outputName}.xml"
+             class="flex items-center justify-between px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg hover:border-blue-600 hover:bg-gray-800 transition-colors group">
+            <div>
+              <span class="text-blue-400 group-hover:text-blue-300 font-semibold">${s.outputName}</span>
+              <div class="text-gray-600 text-xs mt-0.5 truncate max-w-md">${s.sourcePath}</div>
+            </div>
+            <div class="text-gray-700 text-xs text-right shrink-0 ml-4">
+              ${new Date(s.importedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+            </div>
+          </a>
+        `).join('')
+
+        document.getElementById('empty').classList.toggle('hidden', visible.length > 0)
+      }
+
+      render('')
+      document.getElementById('search').addEventListener('input', e => render(e.target.value))
+    }
+
+    load()
+  </script>
+</body>
+</html>
